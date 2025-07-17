@@ -212,9 +212,9 @@ $(function () {
 /* Footer */
 function validateEmail(mail) {
   if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)) {
-    return false;
+    return true;
   }
-  return true;
+  return false;
 }
 
 $(".alert-danger button").click(function () {
@@ -228,50 +228,93 @@ $(".alert-success button").click(function () {
 });
 
 function sendEmail() {
-  let name = $("#name").val();
-  let email = $("#email").val();
-  let subject = $("#subject").val();
-  let message = $("#message").val();
+  let nameInput = $("#name");
+  let emailInput = $("#email");
+  let subjectInput = $("#subject");
+  let messageInput = $("#message");
+  let button = $(".submit");
 
-  if (name == "" || email == "" || subject == "" || message == "") {
+  let name = nameInput.val();
+  let email = emailInput.val();
+  let title = subjectInput.val();
+  let message = messageInput.val();
+
+  if (name == "" || email == "" || title == "" || message == "") {
     $(".alert-danger").show();
     $(".alert-success").hide();
     $(".alert-warning").hide();
-  } else if (validateEmail(email)) {
-    $(".alert-danger").show();
-    $(".alert-success").hide();
-    $(".alert-warning").hide();
-  } else {
-    let body =
-      "Name: " +
-      name +
-      "<br>Email: " +
-      email +
-      "<br>Subject: " +
-      subject +
-      "<br>Message: " +
-      message;
-
-    Email.send({
-      SecureToken: "c0d2eae6-34e2-4787-86f5-a6a0d78861e9",
-
-      To: "sushantpatial18@gmail.com",
-      From: "patial.sushant12345@gmail.com",
-      Subject: "Portfolio - new message from " + name,
-      Body: body,
-    }).then((message) => {
-      if (message == "OK") {
-        $(".alert-success").show();
-        $(".alert-danger").hide();
-        $(".alert-warning").hide();
-      } else {
-        console.error(message);
-        $(".alert-warning").show();
-        $(".alert-danger").hide();
-        $(".alert-success").hide();
-      }
-    });
+    return;
   }
+
+  if (!validateEmail(email)) {
+    $(".alert-danger").show();
+    $(".alert-success").hide();
+    $(".alert-warning").hide();
+    return;
+  }
+  nameInput.prop("disabled", true);
+  emailInput.prop("disabled", true);
+  subjectInput.prop("disabled", true);
+  messageInput.prop("disabled", true);
+  button.prop("disabled", true).addClass("disabled");
+  const templateParams = {
+    name,
+    email,
+    title,
+    message,
+  };
+  emailjs
+    .send("service_w4izovm", "template_qc26yhp", templateParams)
+    .then(
+      (response) => {
+        console.log("SUCCESS!", response.status, response.text);
+        if (response.status === 200) {
+          $(".alert-success").show();
+          $(".alert-danger").hide();
+          $(".alert-warning").hide();
+
+          nameInput.val("");
+          emailInput.val("");
+          subjectInput.val("");
+          messageInput.val("");
+        } else {
+          $(".alert-warning").show();
+          $(".alert-danger").hide();
+          $(".alert-success").hide();
+        }
+      },
+      (error) => {
+        console.log("FAILED...", error);
+      }
+    )
+    .finally(() => {
+      // Re-enable inputs and button
+      nameInput.prop("disabled", false);
+      emailInput.prop("disabled", false);
+      subjectInput.prop("disabled", false);
+      messageInput.prop("disabled", false);
+      button.prop("disabled", false).removeClass("disabled");
+    });
+
+  // Email.send({
+  //   SecureToken: "c0d2eae6-34e2-4787-86f5-a6a0d78861e9",
+
+  //   To: "vasugambhir15@gmail.com",
+  //   From: "vasugambhir555@gmail.com",
+  //   Subject: "Portfolio - new message from " + name,
+  //   Body: body,
+  // }).then((message) => {
+  //   if (message == "OK") {
+  //     $(".alert-success").show();
+  //     $(".alert-danger").hide();
+  //     $(".alert-warning").hide();
+  //   } else {
+  //     console.error(message);
+  //     $(".alert-warning").show();
+  //     $(".alert-danger").hide();
+  //     $(".alert-success").hide();
+  //   }
+  // });
 }
 
 /* Getting year for footer */
