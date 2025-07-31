@@ -24,7 +24,7 @@ $(window).on("load", function () {
         "A Web Developer",
         "A Software Developer",
         "A Roboticist",
-        "An Engineering Student",
+        "An Engineering Graduate",
       ],
       typeSpeed: 75,
       backSpeed: 50,
